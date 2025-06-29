@@ -1,0 +1,12 @@
+flask
+twilio
+openai
+google-generativeai
+sentence-transformers
+faiss-cpu
+beautifulsoup4
+pydub
+whisper
+python-dotenv
+pytest
+ngrok

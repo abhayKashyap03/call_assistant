@@ -73,4 +73,6 @@ The application is scaffolded with placeholder implementations. Each service mod
 Create a `.env` file with necessary API keys:
 ```
 TWILIO_ACCOUNT_SID=your_account_sid
-TWILIO_AUTH_TOKEN=your_aut
+TWILIO_AUTH_TOKEN=your_auth_token
+GEMINI_API_KEY=your_gemini_api_key
+```

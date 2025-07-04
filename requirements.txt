@@ -10,3 +10,7 @@ whisper
 python-dotenv
 pytest
 ngrok
+requests
+markdown
+trafilatura
+urllib3

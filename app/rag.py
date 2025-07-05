@@ -449,9 +449,6 @@ class RAGService:
         self.embedding_engine = EmbeddingEngine(model_name)
         self.vector_store = VectorStore(self.embedding_engine.dimension)
         self.search_engine = SearchR1Engine()
-
-        # Load existing vector index from ingestion step
-        self.load_index()
         
         # Initialize Gemini client
         self.gemini_client = None
@@ -473,19 +470,13 @@ class RAGService:
             chunks = self.chunker.chunk_text(doc['content'], doc.get('source', 'unknown'))
             all_chunks.extend(chunks)
         
-        print("done adding chunks")
-
         if all_chunks:
             # Generate embeddings
             texts = [chunk.text for chunk in all_chunks]
             embeddings = self.embedding_engine.embed_texts(texts)
             
-            print("done embeddings")
-
             # Add to vector store
             self.vector_store.add_chunks(all_chunks, embeddings)
-            
-            print("done adding to vector store")
             
             logger.info(f"Added {len(documents)} documents ({len(all_chunks)} chunks) to knowledge base")
     
@@ -500,6 +491,9 @@ class RAGService:
         Returns:
             List of SearchResult objects with reasoning
         """
+        # Load existing vector index from ingestion step
+        self.load_index()
+
         if len(self.vector_store.chunks) == 0:
             logger.warning("No documents in knowledge base")
             return []
@@ -711,6 +705,4 @@ if __name__ == "__main__":
     results = rag.retrieve("What is machine learning?", k=3)
     for result in results:
         print(f"Score: {result.relevance_score:.3f}")
-        print(f"Text: {result.chunk.text[:100]}...")
-        print(f"Reasoning: {result.reasoning_path}")
-        print("---")
+        print(f"Text: {result

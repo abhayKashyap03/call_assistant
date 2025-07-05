@@ -73,6 +73,7 @@ def ingest_documents():
         
         # Add documents to RAG service
         rag_service.add_documents(documents)
+        rag_service.save_index()
         
         print(f"Successfully ingested {len(documents)} documents")
         

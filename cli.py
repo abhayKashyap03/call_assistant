@@ -107,7 +107,7 @@ def open_ngrok_tunnel():
                 public_url = tunnels[0]['public_url']
                 print(f"Ngrok tunnel active!")
                 print(f"Public URL: {public_url}")
-                print(f"Local URL: http://localhost:5000")
+                print(f"Local URL: http://localhost:4040")
                 print("Press Ctrl+C to stop the tunnel")
                 
                 # Keep the process running

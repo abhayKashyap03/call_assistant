@@ -449,12 +449,15 @@ class RAGService:
         self.embedding_engine = EmbeddingEngine(model_name)
         self.vector_store = VectorStore(self.embedding_engine.dimension)
         self.search_engine = SearchR1Engine()
+
+        # Load existing vector index from ingestion step
+        self.load_index()
         
         # Initialize Gemini client
         self.gemini_client = None
         if os.getenv('GOOGLE_API_KEY'):
             genai.configure(api_key=os.getenv('GOOGLE_API_KEY'))
-            self.gemini_client = genai.GenerativeModel('gemini-pro')
+            self.gemini_client = genai.GenerativeModel('gemini-2.0-flash-lite')
             logger.info("Gemini client initialized")
     
     def add_documents(self, documents: List[Dict[str, str]]):

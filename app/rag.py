@@ -679,30 +679,3 @@ def retrieve(query: str, k: int = 5, rag_service: Optional[RAGService] = None) -
         rag_service.load_index()
     
     return rag_service.retrieve(query, k)
-
-
-# Example usage and testing functions
-if __name__ == "__main__":
-    # Example usage
-    rag = RAGService()
-    
-    # Add some sample documents
-    sample_docs = [
-        {
-            "text": "Machine learning is a subset of artificial intelligence that enables computers to learn without being explicitly programmed. It uses algorithms to analyze data, identify patterns, and make predictions or decisions.",
-            "source": "ml_basics.txt"
-        },
-        {
-            "text": "Natural language processing (NLP) is a branch of AI that helps computers understand, interpret and manipulate human language. It combines computational linguistics with statistical and machine learning models.",
-            "source": "nlp_intro.txt"
-        }
-    ]
-    
-    rag.add_documents(sample_docs)
-    rag.save_index()
-    
-    # Test retrieval
-    results = rag.retrieve("What is machine learning?", k=3)
-    for result in results:
-        print(f"Score: {result.relevance_score:.3f}")
-        print(f"Text: {result

@@ -8,8 +8,6 @@ A minimal Flask service for handling AI-powered voice calls via Twilio.
 app/
   __init__.py  # create_app() factory
   routes.py    # health + /voice endpoints
-  stt.py       # Speech-to-Text wrapper
-  tts.py       # Text-to-Speech wrapper
   rag.py       # retrieval + Gemini integration
   convo.py     # ConversationController
 cli.py         # helper commands

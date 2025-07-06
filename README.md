@@ -7,7 +7,7 @@ A minimal Flask service for handling AI-powered voice calls via Twilio.
 ```
 app/
   __init__.py  # create_app() factory
-  routes.py    # health + /twilio/webhook endpoints
+  routes.py    # health + /voice endpoints
   stt.py       # Speech-to-Text wrapper
   tts.py       # Text-to-Speech wrapper
   rag.py       # retrieval + Gemini integration
@@ -38,7 +38,7 @@ flask --app app run --debug
 ## Endpoints
 
 - `GET /health` - Health check endpoint
-- `POST /twilio/webhook` - Twilio webhook for voice calls
+- `POST /voice` - Twilio webhook for voice calls
 
 ## CLI Commands
 

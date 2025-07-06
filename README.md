@@ -18,9 +18,9 @@ run.py         # Flask app launcher
 
 ## Setup
 
-1. Install dependencies:
+1. Install dependencies and setup project:
 ```bash
-pip install -r requirements.txt
+pip install -e .
 ```
 
 2. Run the Flask application:

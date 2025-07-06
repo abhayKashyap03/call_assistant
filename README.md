@@ -59,15 +59,6 @@ python cli.py ngrok
 python cli.py --help
 ```
 
-## Development
-
-The application is scaffolded with placeholder implementations. Each service module contains TODO comments indicating where actual implementation should be added:
-
-- **STT Service**: Integrate with speech-to-text API
-- **TTS Service**: Integrate with text-to-speech API  
-- **RAG Service**: Implement vector search and Gemini integration
-- **Conversation Controller**: Enhance conversation flow logic
-
 ## Environment Variables
 
 Create a `.env` file with necessary API keys:

@@ -1,6 +1,10 @@
 """Flask application runner."""
 
 from app import create_app
+from dotenv import load_dotenv
+
+
+load_dotenv()
 
 # Create the Flask application
 app = create_app()

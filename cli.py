@@ -23,7 +23,7 @@ def scrape_website(url, max_depth=2, delay=1.0):
         print(f"Max depth: {max_depth}, Delay: {delay}s")
         
         # Import the advanced scraper
-        from app.scraper import scrape_website as advanced_scrape
+        from app.backend.scraper import scrape_website as advanced_scrape
         
         # Run the advanced scraper
         advanced_scrape(url, max_depth=max_depth, delay=delay)
@@ -43,7 +43,7 @@ def ingest_documents():
         print("Ingesting documents and building vector store...")
         
         # Import here to avoid circular imports
-        from app.rag import RAGService
+        from app.backend.rag import RAGService
         
         rag_service = RAGService()
         

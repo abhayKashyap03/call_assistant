@@ -21,7 +21,7 @@ setup(
         "whisper",
         "python-dotenv",
         "pytest",
-        "ngrok",
+        "pyngrok",
         "requests",
         "markdown",
     ],

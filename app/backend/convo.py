@@ -1,8 +1,33 @@
 """Conversation Controller to orchestrate the AI call flow."""
 
-from app.stt import SpeechToTextService
-from app.tts import TextToSpeechService
-from app.rag import RAGService
+from twilio.twiml.voice_response import VoiceResponse, Gather, Say, Redirect
+from twilio.rest import Client
+from app.backend.rag import RAGService
+from dotenv import load_dotenv
+import os
+
+
+load_dotenv()
+
+def update_webhook_url(url):
+    """Update the Twilio webhook URL for voice calls."""
+    try:
+        # Load environment variables
+        account_sid = os.getenv('TWILIO_ACCOUNT_SID')
+        auth_token = os.getenv('TWILIO_AUTH_TOKEN')
+        phone_sid = os.getenv('TWILIO_PHONE_SID')
+
+        # Initialize Twilio client
+        client = Client(account_sid, auth_token)
+
+        # Update the webhook URL
+        client.incoming_phone_numbers(phone_sid).update(
+            voice_url=url
+        )
+        
+        print("Webhook URL updated successfully.")
+    except Exception as e:
+        return e
 
 
 class ConversationController:
@@ -10,8 +35,6 @@ class ConversationController:
     
     def __init__(self):
         """Initialize the conversation controller."""
-        self.stt_service = SpeechToTextService()
-        self.tts_service = TextToSpeechService()
         self.rag_service = RAGService()
         self.active_conversations = {}
     
@@ -93,15 +116,14 @@ class ConversationController:
             str: TwiML XML response
         """
         # Basic TwiML response with Gather for speech input
-        twiml = f"""<?xml version="1.0" encoding="UTF-8"?>
-<Response>
-    <Gather input="speech" action="/voice" method="POST" speechTimeout="auto">
-        <Say>{message}</Say>
-    </Gather>
-    <Say>I didn't hear anything. Please try again.</Say>
-    <Redirect>/voice</Redirect>
-</Response>"""
-        return twiml
+        response = VoiceResponse()
+        gather = Gather(input='speech', action='/voice', method='POST', speech_timeout='auto')
+        gather.say(message)
+        response.append(gather)
+        response.say("I didn't hear anything. Please try again.")
+        response.redirect('/voice')
+        
+        return str(response)
     
     def end_conversation(self, call_sid):
         """

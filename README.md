@@ -7,18 +7,25 @@ A minimal Flask service for handling AI-powered voice calls via Twilio.
 ```
 app/
   __init__.py  # create_app() factory
-  routes.py    # health + /voice endpoints
-  rag.py       # retrieval + Gemini integration
-  convo.py     # ConversationController
+  backend/
+    __init__.py
+    ngrok_control.py   # Utility functions for managing ngrok server
+    routes.py          # health + /voice endpoints
+    rag.py             # retrieval + Gemini integration
+    convo.py           # ConversationController
+    scraper.py         # Web scraper for online knowledge base
+  frontend/
+    ...        # React app files
 cli.py         # helper commands
 run.py         # Flask app launcher
 ```
 
 ## Setup
 
-1. Install dependencies and setup project:
+1. Install dependencies and set up the project:
 ```bash
 pip install -e .
+cd app/frontend && npm install
 ```
 
 2. Run the Flask application:
@@ -33,10 +40,18 @@ flask --app app run
 flask --app app run --debug
 ```
 
+3. Start React app from inside the frontend folder
+```bash
+npm run dev
+```
+
 ## Endpoints
 
 - `GET /health` - Health check endpoint
 - `POST /voice` - Twilio webhook for voice calls
+- `POST /ngrok/start` - Start a new ngrok server
+- `POST /ngrok/stop`  - Stop the current ngrok server
+- `GET /ngrok/status` - Get ngrok server status
 
 ## CLI Commands
 
@@ -59,9 +74,11 @@ python cli.py --help
 
 ## Environment Variables
 
-Create a `.env` file with necessary API keys:
+Create a `.env` file with the necessary API keys:
 ```
-TWILIO_ACCOUNT_SID=your_account_sid
-TWILIO_AUTH_TOKEN=your_auth_token
-GOOGLE_API_KEY=your_gemini_api_key
+GOOGLE_API_KEY=<your-gemini-api-key>
+TWILIO_ACCOUNT_SID=<your-twilio-account-sid>
+TWILIO_AUTH_TOKEN=<your-twilio-auth-token>
+TWILIO_PHONE_SID=<your-twilio-number-sid>
+NGROK_AUTH_TOKEN=<your-ngrok-auth-token>
 ```

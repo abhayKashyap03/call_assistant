@@ -164,7 +164,7 @@ test_rag_answer.py          # Test the RAG responses generated
 ### Basic Document Ingestion
 
 ```python
-from app.rag import RAGService
+from app.backend.rag import RAGService
 
 # Initialize service
 rag = RAGService()
@@ -188,7 +188,7 @@ rag.save_index("data/vector.index")
 results = rag.retrieve("your query", k=5)
 
 # Method 2: Using the helper function
-from app.rag import retrieve
+from app.backend.rag import retrieve
 results = retrieve("your query", k=5)
 
 # Results contain SearchResult objects with relevance scores

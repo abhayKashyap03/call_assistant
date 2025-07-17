@@ -1,87 +1,44 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import React, { useState } from 'react';
+import './App.css';
 
-function StartButton() {
-  const [isLoading, setIsLoading] = useState(false);
+// Import the two "page" components we have created
+import MainPage from './MainPage';
+import SettingsPage from './SettingsPage';
 
-  const handleClick = async () => {
-    console.log("Starting ngrok server...");
-    setIsLoading(true);
-
-    try {
-      const response = await axios.post('http://127.0.0.1:5000/ngrok/start');
-      console.log("Ngrok server started:", response.data);
-    } catch (error) {
-      console.error("Error starting ngrok server:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  }
-
-  return (
-    <button className="my-button" onClick={handleClick}>
-      Start ngrok server
-    </button>
-  );
-}
-
-function StopButton() {
-
-  const [isLoading, setIsLoading] = useState(false);
-
-  const handleClick = async () => {
-    console.log("Stopping ngrok server...");
-    setIsLoading(true);
-
-    try {
-      const response = await axios.post('http://127.0.0.1:5000/ngrok/stop');
-      console.log("Ngrok server stopped:", response.data);
-    } catch (error) {
-      console.error("Error stopping ngrok server:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  }
-
-  return (
-    <button className="my-button" onClick={handleClick}>
-      Stop ngrok server
-    </button>
-  );
-}
-
-function StatusButton() {
-
-  const [isLoading, setIsLoading] = useState(false);
-
-  const handleClick = async () => {
-    console.log("Getting ngrok server status...");
-    setIsLoading(true);
-
-    try {
-      const response = await axios.get('http://127.0.0.1:5000/ngrok/status');
-      console.log("Ngrok server status:", response.data);
-    } catch (error) {
-      console.error("Error getting ngrok server status:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  }
-
-  return (
-    <button className="my-button" onClick={handleClick}>
-      Get ngrok server status
-    </button>
-  );
-}
+// Define the possible pages our app can show
+type Page = 'main' | 'settings';
 
 export default function App() {
+  // --- STATE MANAGEMENT ---
+  // This state variable keeps track of which page is currently active.
+  const [currentPage, setCurrentPage] = useState<Page>('main');
+
+  // --- UI RENDERING (JSX) ---
   return (
-    <div>
-      <h1>My App</h1>
-      <StartButton />
-      <StopButton />
-      <StatusButton />
+    <div className="container">
+      <header>
+        <h1>AI Call Agent</h1>
+        {/* The navigation changes which component is rendered below */}
+        <nav className="main-nav">
+          <button 
+            onClick={() => setCurrentPage('main')}
+            className={currentPage === 'main' ? 'active' : ''}>
+            Control Panel
+          </button>
+          <button 
+            onClick={() => setCurrentPage('settings')}
+            className={currentPage === 'settings' ? 'active' : ''}>
+            Settings
+          </button>
+        </nav>
+      </header>
+
+      <main>
+        {/* --- CONDITIONAL RENDERING --- */}
+        {/* This is the logic that switches between pages */}
+        {currentPage === 'main' && <MainPage />}
+        {currentPage === 'settings' && <SettingsPage onSaveSuccess={() => setCurrentPage('main')}/>}
+      </main>
     </div>
   );
 }

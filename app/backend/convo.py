@@ -3,6 +3,7 @@
 from twilio.twiml.voice_response import VoiceResponse, Gather, Say, Redirect
 from twilio.rest import Client
 from app.backend.rag import RAGService
+from app.backend.settings import SettingsService
 from dotenv import load_dotenv
 import os
 
@@ -13,9 +14,10 @@ def update_webhook_url(url):
     """Update the Twilio webhook URL for voice calls."""
     try:
         # Load environment variables
-        account_sid = os.getenv('TWILIO_ACCOUNT_SID')
-        auth_token = os.getenv('TWILIO_AUTH_TOKEN')
-        phone_sid = os.getenv('TWILIO_PHONE_SID')
+        current_settings = SettingsService().get_settings()
+        account_sid = current_settings.twilio_account_sid
+        auth_token = current_settings.twilio_auth_token
+        phone_sid = current_settings.twilio_phone_sid
 
         # Initialize Twilio client
         client = Client(account_sid, auth_token)
@@ -27,7 +29,8 @@ def update_webhook_url(url):
         
         print("Webhook URL updated successfully.")
     except Exception as e:
-        return e
+        print("exception!!!")
+        raise Exception(e) from e
 
 
 class ConversationController:
@@ -102,7 +105,7 @@ class ConversationController:
             str: AI response
         """
         # Use RAG service to generate contextual response
-        response = self.rag_service.generate_response(user_input)
+        response = self.rag_service.generate_response(user_input, conv_context=conversation['messages'])
         return response
     
     def create_twiml_response(self, message):

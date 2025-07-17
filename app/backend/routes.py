@@ -1,11 +1,13 @@
 from flask import Blueprint, request, jsonify, Response
-from app.backend.convo import ConversationController, update_webhook_url
+from app.backend.convo import ConversationController
 from app.backend.ngrok_control import NgrokManager
+from app.backend.settings import Settings, SettingsService
 
 
 bp = Blueprint('main', __name__)
 conversation_controller = ConversationController()
 ngrok_manager = NgrokManager()
+settings_service = SettingsService()
 
 
 @bp.route('/health', methods=['GET'])
@@ -39,7 +41,6 @@ def twilio_webhook():
 def start_ngrok():
     try:
         public_url = ngrok_manager.start_ngrok_tunnel()
-        update_webhook_url(f"{public_url}/voice")
         return jsonify({'status': 'success', 'public_url': public_url})
     except Exception as e:
         print(f"Error starting ngrok: {e}")
@@ -57,3 +58,20 @@ def stop_ngrok():
 @bp.route('/ngrok/status', methods=['GET'])
 def get_ngrok_status():
     return jsonify(ngrok_manager.get_tunnel_status())
+
+@bp.route('/env', methods=['GET', 'POST'])
+def update_env():
+    """Update environment variables."""
+    if request.method == 'POST':
+        settings_service.save(Settings(**request.json))
+        return jsonify({'status': 'success', 'message': 'Environment variables updated'})
+    
+    # Mask sensitive data
+    current_settings = settings_service.get_settings()
+    safe_settings = current_settings.model_dump(exclude_unset=True)
+    safe_settings['twilio_auth_token'] = '***' if current_settings.twilio_auth_token else None
+    safe_settings['twilio_account_sid'] = '***' if current_settings.twilio_account_sid else None
+    safe_settings['twilio_phone_sid'] = '***' if current_settings.twilio_phone_sid else None
+    safe_settings['ngrok_auth_token'] = '***' if current_settings.ngrok_auth_token else None
+    safe_settings['google_api_key'] = '***' if current_settings.google_api_key else None
+    return jsonify(safe_settings)

@@ -33,6 +33,8 @@ from collections import defaultdict
 # Google Gemini integration
 import google.generativeai as genai
 
+from app.backend.settings import SettingsService
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -451,11 +453,9 @@ class RAGService:
         self.search_engine = SearchR1Engine()
         
         # Initialize Gemini client
-        self.gemini_client = None
-        if os.getenv('GOOGLE_API_KEY'):
-            genai.configure(api_key=os.getenv('GOOGLE_API_KEY'))
-            self.gemini_client = genai.GenerativeModel('gemini-2.0-flash-lite')
-            logger.info("Gemini client initialized")
+        genai.configure(api_key=SettingsService().get_settings().google_api_key)
+        self.gemini_client = genai.GenerativeModel('gemini-2.0-flash-lite')
+        logger.info("Gemini client initialized")
     
     def add_documents(self, documents: List[Dict[str, str]]):
         """
@@ -521,7 +521,7 @@ class RAGService:
         
         return reranked_results[:k]
     
-    def generate_response(self, query: str, context: Optional[List[SearchResult]] = None) -> str:
+    def generate_response(self, query: str, conv_context: Optional[List] = None, context: Optional[List[SearchResult]] = None) -> str:
         """
         Generate response using Gemini with retrieved context.
         
@@ -532,6 +532,9 @@ class RAGService:
         Returns:
             Generated response
         """
+        if conv_context is None:
+            conv_context = "No previous messages."
+
         if context is None:
             context = self.retrieve(query)
         
@@ -552,14 +555,17 @@ class RAGService:
         # Generate response
         if self.gemini_client:
             prompt = f"""
-Based on the following context, please answer the user's question. Be accurate and cite the relevant sources.
+                Based on the following context, and previous conversation messages, if any, please answer the user's question. Be accurate and cite the relevant sources.
 
-Context:
-{context_str}
+                Previous conversation:
+                {conv_context}
+                
+                Context:
+                {context_str}
 
-Question: {query}
+                Question: {query}
 
-Answer:"""
+                Answer:"""
             
             try:
                 response = self.gemini_client.generate_content(prompt)
@@ -605,19 +611,19 @@ Answer:"""
                 )
                 
                 system_persona = """You are a knowledgeable AI assistant that provides accurate, well-sourced answers. 
-Always cite your sources when providing information. Be concise but thorough in your responses."""
+                    Always cite your sources when providing information. Be concise but thorough in your responses."""
                 
                 prompt = f"""{system_persona}
 
-Based on the following context sources, please answer the user's question. 
-Cite the relevant sources in your answer using [Source: filename] format.
+                    Based on the following context sources, please answer the user's question. 
+                    Cite the relevant sources in your answer using [Source: filename] format.
 
-Context:
-{context_str}
+                    Context:
+                    {context_str}
 
-Question: {query}
+                    Question: {query}
 
-Answer:"""
+                    Answer:"""
                 
                 # Step 3: Call Gemini API
                 response = self.gemini_client.generate_content(prompt)
@@ -632,11 +638,9 @@ Answer:"""
             else:
                 # Fallback when Gemini client is not configured
                 fallback_answer = f"""Based on the retrieved context, I found relevant information from the following sources: {', '.join(set(sources))}.
-
-However, I need a Google API key (GOOGLE_API_KEY environment variable) to provide a detailed generated response.
-
-Retrieved context:
-{chr(10).join(f'- {result.chunk.text[:200]}...' for result in retrieved_context[:3])}"""
+                    However, I need a Google API key to provide a detailed generated response.
+                    Retrieved context:
+                    {chr(10).join(f'- {result.chunk.text[:200]}...' for result in retrieved_context[:3])}"""
                 
                 avg_relevance = sum(result.relevance_score for result in retrieved_context) / len(retrieved_context)
                 confidence = avg_relevance * 0.5  # Lower confidence without LLM generation

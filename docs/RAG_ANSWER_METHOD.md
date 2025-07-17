@@ -28,7 +28,7 @@ def answer(self, query: str, k: int = 5) -> Tuple[str, float, List[str]]:
 ## Usage Example
 
 ```python
-from app.rag import RAGService
+from app.backend.rag import RAGService
 
 # Initialize RAG service
 rag = RAGService()

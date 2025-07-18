@@ -3,7 +3,7 @@
 from twilio.twiml.voice_response import VoiceResponse, Gather, Say, Redirect
 from twilio.rest import Client
 from app.backend.rag import RAGService
-from app.backend.settings import SettingsService
+from app.backend.configs.settings import SettingsService
 from dotenv import load_dotenv
 import os
 

@@ -16,7 +16,7 @@ import numpy as np
 from typing import List, Tuple
 
 # Import the RAG module
-from app.rag import RAGService, DocumentChunk, SearchResult
+from app.backend.rag import RAGService, DocumentChunk, SearchResult
 
 
 class MockGeminiResponse:

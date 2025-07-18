@@ -19,7 +19,7 @@ Requirements:
 import os
 import sys
 from typing import List, Dict
-from app.rag import RAGService
+from app.backend.rag import RAGService
 
 
 def setup_sample_knowledge_base() -> RAGService:

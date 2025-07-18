@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify, Response
-from app.backend.convo import ConversationController
-from app.backend.ngrok_control import NgrokManager
-from app.backend.settings import Settings, SettingsService
+from app.backend.voice.convo import ConversationController
+from app.backend.voice.ngrok_control import NgrokManager
+from app.backend.configs.settings import Settings, SettingsService
 
 
 bp = Blueprint('main', __name__)

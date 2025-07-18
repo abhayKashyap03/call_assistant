@@ -1,6 +1,6 @@
 from pyngrok import ngrok
-from app.backend.settings import SettingsService
-from app.backend.convo import update_webhook_url
+from app.backend.configs.settings import SettingsService
+from app.backend.voice.convo import update_webhook_url
 
 
 class NgrokManager:

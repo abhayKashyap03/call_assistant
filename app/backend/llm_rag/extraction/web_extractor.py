@@ -1,5 +1,6 @@
 from app.backend.llm_rag.extraction.base_extractor import BaseExtractor, Document
 import trafilatura
+import json
 
 
 class WebExtractor(BaseExtractor):
@@ -21,7 +22,7 @@ class WebExtractor(BaseExtractor):
         response = trafilatura.fetch_url(src)
         if not response:
             raise ValueError(f"Failed to fetch content from {src}")
-        content = trafilatura.extract(response, output_format='json', with_metadata=True)
+        content = json.loads(trafilatura.extract(response, output_format='json', with_metadata=True))
         if not content:
             raise ValueError(f"No content extracted from {src}")
         return Document(

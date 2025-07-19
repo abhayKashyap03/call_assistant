@@ -30,7 +30,7 @@ class FileExtractor(BaseExtractor):
     
     def extract(self, src: str) -> Document:
         """
-        Extracts information from the given document content.
+        Extracts text, images, and tables from the given document content.
 
         Args:
             src (str): The source document content to extract information from.
@@ -39,13 +39,49 @@ class FileExtractor(BaseExtractor):
             Document: Document containing the extracted information.
         """
         docs = self._load_files(src)
-        for page in docs:
+        all_text = []
+        all_tables = []
+        all_images = []
+        content_parts = []
+        for i, page in enumerate(docs):
+            # Extract text
             text = page.get_text()
             if text:
-                return Document(
-                    title=os.path.basename(src),
-                    content=text,
-                    metadata={"source": src}
-                )
-        raise ValueError(f"No content extracted from {src}")
+                content_parts.append(text)
+                all_text.append(text)
+            # Extract tables
+            try:
+                tables = page.find_tables()
+                for table in tables:
+                    try:
+                        table_data = table.extract()
+                        content_parts.append(f"[TABLE page={i}] {table_data}")
+                        all_tables.append(table_data)
+                    except Exception as e:
+                        print(f"Error extracting table on page {i}: {e}")
+            except Exception as e:
+                print(f"Error finding tables on page {i}: {e}")
+            # Extract images (add placeholders to content)
+            try:
+                images = page.get_images(full=True)
+                if images:
+                    for img_idx, img_info in enumerate(images):
+                        img_str = f"[IMAGE page={i} idx={img_idx} info={img_info}]"
+                        content_parts.append(img_str)
+                        all_images.append(img_info)
+            except Exception as e:
+                print(f"Error extracting images on page {i}: {e}")
+        if not content_parts:
+            raise ValueError(f"No content extracted from {src}")
+        content = "\n\n".join(content_parts)
+        metadata = {
+            "source": src,
+            "num_images": len(all_images),
+            "num_tables": len(all_tables)
+        }
+        return Document(
+            title=os.path.basename(src),
+            content=content,
+            metadata=metadata
+        )
         

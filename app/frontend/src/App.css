@@ -220,3 +220,44 @@ h2 {
   color: white;
   border-color: #2c3e50;
 }
+
+.docin-container {
+  max-width: 500px;
+  margin: 2rem auto;
+  padding: 24px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px #eee;
+}
+
+.docin-form {
+  margin-bottom: 16px;
+}
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+input[type="file"] {
+  display: block;
+}
+
+input[type="url"] {
+  width: 100%;
+}
+
+.docin-status {
+  margin-top: 16px;
+}
+
+.docin-status.error {
+  color: red;
+}
+
+.docin-status.success {
+  color: green;
+}
+
+.docin-preview {
+  margin-top: 16px;
+}

@@ -4,7 +4,6 @@ from pydantic import BaseModel
 
 
 class Document(BaseModel):
-    title: Optional[str]
     content: str
     metadata: dict = {}
 

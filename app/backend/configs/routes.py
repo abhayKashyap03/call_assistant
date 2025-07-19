@@ -1,7 +1,10 @@
+import os
+import tempfile
 from flask import Blueprint, request, jsonify, Response
 from app.backend.voice.convo import ConversationController
 from app.backend.voice.ngrok_control import NgrokManager
 from app.backend.configs.settings import Settings, SettingsService
+from app.backend.llm_rag.rag_pipeline import RAGPipeline
 
 
 bp = Blueprint('main', __name__)
@@ -64,7 +67,7 @@ def update_env():
     """Update environment variables."""
     if request.method == 'POST':
         settings_service.save(Settings(**request.json))
-        return jsonify({'status': 'success', 'message': 'Environment variables updated'})
+        return jsonify({'status': 'success', 'message': 'Environment variables updated'}), 200
     
     # Mask sensitive data
     current_settings = settings_service.get_settings()
@@ -74,4 +77,35 @@ def update_env():
     safe_settings['twilio_phone_sid'] = '***' if current_settings.twilio_phone_sid else None
     safe_settings['ngrok_auth_token'] = '***' if current_settings.ngrok_auth_token else None
     safe_settings['google_api_key'] = '***' if current_settings.google_api_key else None
-    return jsonify(safe_settings)
+    return jsonify(safe_settings), 200
+
+@bp.route('/doc_in', methods=['POST'])
+def doc_in():
+    """Handle document upload or URL ingestion."""
+    try:
+        rag_pipeline = RAGPipeline()
+        uploaded_files = request.files.getlist('file')
+        url = request.form.get('url')
+
+        if uploaded_files:
+            for file_storage in uploaded_files:
+                tmp = tempfile.NamedTemporaryFile(delete=False, suffix=os.path.splitext(file_storage.filename)[1])
+                file_storage.save(tmp.name)
+                tmp.close()  # Ensure file is written and closed before ingestion
+                # Debug: check file exists and size
+                if not os.path.exists(tmp.name):
+                    print(f"Temp file does not exist: {tmp.name}")
+                else:
+                    size = os.path.getsize(tmp.name)
+                    print(f"Temp file {tmp.name} size: {size} bytes")
+                rag_pipeline.ingest_single(tmp.name)
+                os.remove(tmp.name)
+            return jsonify({'status': 'success', 'message': 'Document(s) uploaded successfully'})
+        elif url:
+            rag_pipeline.ingest_single(url)
+            return jsonify({'status': 'success', 'message': 'URL ingested successfully'})
+        else:
+            return jsonify({'status': 'error', 'message': 'No file or URL provided'}), 400
+    except Exception as e:
+        print(f"Error in doc_in: {e}")
+        return jsonify({'status': 'error', 'message': str(e)}), 500

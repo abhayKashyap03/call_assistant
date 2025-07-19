@@ -2,7 +2,7 @@
 
 from twilio.twiml.voice_response import VoiceResponse, Gather, Say, Redirect
 from twilio.rest import Client
-from app.backend.rag import RAGService
+from app.backend.llm_rag.llm import LLMClient
 from app.backend.configs.settings import SettingsService
 from dotenv import load_dotenv
 import os
@@ -38,7 +38,7 @@ class ConversationController:
     
     def __init__(self):
         """Initialize the conversation controller."""
-        self.rag_service = RAGService()
+        self.llm_client = LLMClient()
         self.active_conversations = {}
     
     def handle_call(self, call_sid, speech_result=None):
@@ -105,7 +105,7 @@ class ConversationController:
             str: AI response
         """
         # Use RAG service to generate contextual response
-        response = self.rag_service.generate_response(user_input, conv_context=conversation['messages'])
+        response = self.llm_client.generate_response(user_input, conv_context=conversation['messages'])
         return response
     
     def create_twiml_response(self, message):

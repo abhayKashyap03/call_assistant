@@ -4,9 +4,10 @@ import './App.css';
 // Import the two "page" components we have created
 import MainPage from './MainPage';
 import SettingsPage from './SettingsPage';
+import DocIn from './DocIn';
 
 // Define the possible pages our app can show
-type Page = 'main' | 'settings';
+type Page = 'main' | 'settings' | 'docin';
 
 export default function App() {
   // --- STATE MANAGEMENT ---
@@ -30,6 +31,11 @@ export default function App() {
             className={currentPage === 'settings' ? 'active' : ''}>
             Settings
           </button>
+          <button
+            onClick={() => setCurrentPage('docin')}
+            className={currentPage === 'docin' ? 'active' : ''}>
+            Add Documents
+          </button>
         </nav>
       </header>
 
@@ -38,6 +44,7 @@ export default function App() {
         {/* This is the logic that switches between pages */}
         {currentPage === 'main' && <MainPage />}
         {currentPage === 'settings' && <SettingsPage onSaveSuccess={() => setCurrentPage('main')}/>}
+        {currentPage === 'docin' && <DocIn />}
       </main>
     </div>
   );

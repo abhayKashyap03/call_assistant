@@ -21,7 +21,7 @@ class SettingsService:
     def _load(self) -> Settings:
         if self.settings_file_path.exists():
             with open(self.settings_file_path, 'r') as f:
-                data = json.load(f)
+                data = json.loads(f.read())
                 return Settings(**data)
         return Settings() # Return an empty settings object if file doesn't exist
 

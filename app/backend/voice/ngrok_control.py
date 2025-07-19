@@ -9,8 +9,8 @@ class NgrokManager:
         self.active_tunnel = None
         self.settings_service = SettingsService()
         self.state = {
-            "ngrok": "",
-            "twilio": "",
+            "ngrok": "inactive",
+            "twilio": "unconfigured",
             "publicUrl": ""
         }
     

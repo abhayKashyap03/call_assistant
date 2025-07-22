@@ -1,0 +1,28 @@
+# .dockerignore
+
+# Git files
+.git
+.gitignore
+
+# Docker files
+.dockerignore
+Dockerfile
+docker-compose.yml
+
+# Python virtual environment and cache
+venv
+.venv
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+
+# Node.js dependencies (very important!)
+frontend/node_modules
+frontend/build
+frontend/dist
+.npm
+
+# IDE and OS files
+.vscode
+*.DS_Store

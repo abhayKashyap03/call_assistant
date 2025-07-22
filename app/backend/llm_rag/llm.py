@@ -1,8 +1,7 @@
 import google.generativeai as genai
 from app.backend.configs.settings import SettingsService
-from app.backend.llm_rag.extraction.base_extractor import Document
-from app.backend.llm_rag.rag_pipeline import RAGPipeline
 from typing import List, Optional, Tuple, Any
+from flask import g
 import logging
 
 logger = logging.getLogger(__name__)
@@ -12,14 +11,17 @@ class LLMClient:
     Handles all LLM (Gemini) prompt construction, API calls, and response formatting.
     """
     def __init__(self, model_name: str = 'gemini-2.0-flash-lite', api_key: Optional[str] = None):
+        print('!!! --- LLMClient initialized --- !!!')
         if api_key is None:
-            api_key = SettingsService().get_settings().google_api_key
+            try:
+                api_key = g.settings_service.get_settings().google_api_key
+            except Exception:
+                api_key = SettingsService().get_settings().google_api_key
         genai.configure(api_key=api_key)
         self.model = genai.GenerativeModel(model_name)
         logger.info(f"Initialized Gemini LLMClient with model: {model_name}")
-        self.rag_pipeline = RAGPipeline()
 
-    def generate_response(self, query: str, conv_context: Any = None, k: int = 5) -> str:
+    def generate_response(self, query: str, context: Optional[List] = None, conv_context: Any = None) -> str:
         """
         Generate a conversational response using the LLM, given a query and a RAGPipeline instance.
         This method retrieves context internally from the pipeline.
@@ -27,7 +29,6 @@ class LLMClient:
         if conv_context is None:
             conv_context = "No previous messages."
         # Retrieve context using the pipeline
-        context = self.rag_pipeline.search(query, k=k)
         if not context:
             return "I don't have relevant information to answer your question."
         # Format context for prompt
@@ -58,7 +59,7 @@ class LLMClient:
             logger.error(f"Error generating response with Gemini: {e}")
             return f"Error generating response: {e}"
 
-    def answer(self, query: str, context: Optional[List[Any]] = None) -> Tuple[str, float, List[str]]:
+    def answer(self, query: str, context: Optional[List] = None) -> Tuple[str, float, List[str]]:
         """
         Generate a direct answer using the LLM, with confidence and sources.
         Returns (answer, confidence, sources)
@@ -90,5 +91,3 @@ class LLMClient:
         except Exception as e:
             logger.error(f"Error generating answer with Gemini: {e}")
             return (f"Error generating answer: {str(e)}", 0.0, sources)
-
-

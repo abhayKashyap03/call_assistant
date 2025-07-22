@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { ActionButton } from './MainPage';
 
@@ -70,7 +70,7 @@ export default function SettingsPage({onSaveSuccess}: SettingsPageProps) {
             {showItem ? 
             (<p>Configure API keys and auth tokens</p>) : null
             }
-            <form>
+            <form onSubmit={handleSave}>
                 {Object.entries(settings).map(([key, value]) => (
                     <div key={key} className="form-group">
                         <label>{key.replace(/_/, ' ').toUpperCase()}</label>
@@ -83,7 +83,7 @@ export default function SettingsPage({onSaveSuccess}: SettingsPageProps) {
                     </div>
                 ))}
                 {showItem ? (
-                <ActionButton onClick={handleSave} disabled={isLoading} label={isLoading === true ? 'Saving...' : 'Save Keys'} type='submit' />
+                <ActionButton disabled={isLoading} label={isLoading === true ? 'Saving...' : 'Save Keys'} type='submit' />
                 ) : null
                 }
 

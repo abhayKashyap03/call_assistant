@@ -19,7 +19,7 @@ import logging
 import os
 import re
 import pickle
-from typing import List, Dict, Tuple, Optional, Any, TYPE_CHECKING
+from typing import List, Dict, Tuple, Union, Optional, Any, TYPE_CHECKING
 from dataclasses import dataclass
 import numpy as np
 
@@ -86,6 +86,7 @@ class TextChunker:
     """
     
     def __init__(self, chunk_size: int = 400, overlap: int = 50):
+        print('!!! --- TextChunker initialized --- !!!')
         self.chunk_size = chunk_size
         self.overlap = overlap
         
@@ -173,6 +174,7 @@ class EmbeddingEngine:
     """
     
     def __init__(self, model_name: str = "sentence-transformers/all-MiniLM-L6-v2"):
+        print('!!! --- EmbeddingEngine initialized --- !!!')
         logger.info(f"Loading embedding model: {model_name}")
         self.model = SentenceTransformer(model_name)
         self.dimension = self.model.get_sentence_embedding_dimension()
@@ -220,6 +222,7 @@ class VectorStore:
     """
     
     def __init__(self, dimension: int):
+        print('!!! --- VectorStore initialized --- !!!')
         self.dimension = dimension
         self.index = faiss.IndexFlatL2(dimension)  # L2 distance index
         self.chunks: List[DocumentChunk] = []
@@ -427,17 +430,21 @@ class RAGPipeline:
     Unified RAG pipeline: ingestion, retrieval, and LLM-based answer generation.
     """
     def __init__(self, chunk_size: int = 400, overlap: int = 50, embedding_model: str = "sentence-transformers/all-MiniLM-L6-v2"):
+        print('!!! --- RAGPipeline initialized --- !!!')
         self.extractor_factory = ContentExtractorFactory()
         self.chunker = TextChunker(chunk_size=chunk_size, overlap=overlap)
         self.embedding_engine = EmbeddingEngine(model_name=embedding_model)
         self.search_engine = SearchR1Engine()
-        self.vector_store = None  # Will be initialized after first document
+        self.vector_store = None
+        try:
+            self.load_index()
+        except Exception:
+            pass
 
-    def ingest_single(self, src: str):
+    def ingest_single(self, src: Union[str, DocumentChunk]):
         """
         Ingest a document from a file path or URL, extract content, chunk, embed, and add to vector store.
         """
-        self.load_index()
         text = self.extractor_factory.extract(src).content
         if not text:
             raise ValueError(f"No text content extracted from {src}")
@@ -448,27 +455,20 @@ class RAGPipeline:
         self.vector_store.add_chunks(chunks, embeddings)
         self.save_index()
         logger.info(f"Added document ({len(chunks)} chunks) to knowledge base")
+        print('\n', self.get_stats(), '\n')
 
     def ingest_multiple(self, documents: List[str]):
         """
         Add multiple documents (list of paths) to the knowledge base.
         """
-        self.load_index()
         all_chunks = []
         documents = [self.extractor_factory.extract(doc) for doc in documents]
         for doc in documents:
             text = doc.content
             source = doc.metadata['source']
             chunks = self.chunker.chunk_text(text, source=source)
-            all_chunks.extend(chunks)
-        if all_chunks:
-            texts = [chunk.text for chunk in all_chunks]
-            embeddings = self.embedding_engine.embed_texts(texts)
-            if self.vector_store is None:
-                self.vector_store = VectorStore(self.embedding_engine.dimension)
-            self.vector_store.add_chunks(all_chunks, embeddings)
-            self.save_index()
-            logger.info(f"Added {len(documents)} documents ({len(all_chunks)} chunks) to knowledge base")
+            self.ingest_single(chunks)
+        logger.info(f"Added {len(documents)} documents ({len(all_chunks)} chunks) to knowledge base")
 
     def search(self, query: str, k: int = 5) -> List[SearchResult]:
         if self.vector_store is None:
@@ -482,7 +482,7 @@ class RAGPipeline:
         seen = set()
         deduped = []
         for chunk, score in all_results:
-            chunk_id = chunk.metadata.get('chunk_id') if hasattr(chunk, 'metadata') else None
+            chunk_id = chunk.chunk_id
             if chunk_id not in seen:
                 deduped.append((chunk, score))
                 seen.add(chunk_id)
@@ -509,6 +509,6 @@ class RAGPipeline:
         return {
             "total_chunks": len(self.vector_store.chunks),
             "embedding_dimension": self.embedding_engine.dimension,
-            "sources": list(set(chunk.metadata.get('source', '') for chunk in self.vector_store.chunks)),
-            "avg_chunk_length": np.mean([len(chunk.content.split()) for chunk in self.vector_store.chunks])
+            "sources": list(set(chunk.source for chunk in self.vector_store.chunks)),
+            "avg_chunk_length": np.mean([len(chunk.text.split()) for chunk in self.vector_store.chunks])
         }

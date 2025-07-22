@@ -1,16 +1,18 @@
 import os
 import tempfile
-from flask import Blueprint, request, jsonify, Response
+from flask import Blueprint, request, jsonify, Response, g, current_app
 from app.backend.voice.convo import ConversationController
 from app.backend.voice.ngrok_control import NgrokManager
 from app.backend.configs.settings import Settings, SettingsService
 from app.backend.llm_rag.rag_pipeline import RAGPipeline
-
+import app
 
 bp = Blueprint('main', __name__)
-conversation_controller = ConversationController()
 ngrok_manager = NgrokManager()
-settings_service = SettingsService()
+
+if g.settings_service is None:
+    g.settings_service = SettingsService()
+settings_service = g.settings_service
 
 
 @bp.route('/health', methods=['GET'])
@@ -22,6 +24,10 @@ def health_check():
 @bp.route('/voice', methods=['POST'])
 def twilio_webhook():
     """Handle Twilio webhook for voice calls."""
+    if g.conversation_controller is None:
+        g.conversation_controller = ConversationController()
+    conversation_controller = g.conversation_controller
+    
     try:
         # Get Twilio request data
         call_sid = request.form.get('CallSid')
@@ -75,7 +81,7 @@ def update_env():
     safe_settings['twilio_auth_token'] = '***' if current_settings.twilio_auth_token else None
     safe_settings['twilio_account_sid'] = '***' if current_settings.twilio_account_sid else None
     safe_settings['twilio_phone_sid'] = '***' if current_settings.twilio_phone_sid else None
-    safe_settings['ngrok_auth_token'] = '***' if current_settings.ngrok_auth_token else None
+    safe_settings['ngrok_authtoken'] = '***' if current_settings.ngrok_authtoken else None
     safe_settings['google_api_key'] = '***' if current_settings.google_api_key else None
     return jsonify(safe_settings), 200
 
@@ -83,7 +89,9 @@ def update_env():
 def doc_in():
     """Handle document upload or URL ingestion."""
     try:
-        rag_pipeline = RAGPipeline()
+        if g.rag_pipeline is None:
+            g.rag_pipeline = RAGPipeline()
+        rag_pipeline = g.rag_pipeline
         uploaded_files = request.files.getlist('file')
         url = request.form.get('url')
 

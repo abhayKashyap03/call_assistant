@@ -10,7 +10,9 @@ setup(
     author_email="abhay.kashyap03@gmail.com",
     packages=find_packages(),
     install_requires=[
-        "flask",
+	    "gunicorn",
+        "flask_cors",
+	    "flask",
         "twilio",
         "openai",
         "google-generativeai",
@@ -24,6 +26,10 @@ setup(
         "pyngrok",
         "requests",
         "markdown",
+        "pymupdf",
+        "pydantic",
+        "trafilatura",
+        "lxml_html_clean",
     ],
     entry_points={
         "console_scripts": [

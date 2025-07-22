@@ -1,7 +1,6 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 from typing import Optional
 import json
-import os
 from pathlib import Path
 
 
@@ -9,12 +8,13 @@ class Settings(BaseModel):
     twilio_account_sid: Optional[str] = None
     twilio_auth_token: Optional[str] = None
     twilio_phone_sid: Optional[str] = None
-    ngrok_auth_token: Optional[str] = None
+    ngrok_authtoken: Optional[str] = None
     google_api_key: Optional[str] = None
 
 
 class SettingsService:
-    def __init__(self, settings_file: str = "settings.json"):
+    def __init__(self, settings_file: str = "app/settings.json"):
+        print('!!! --- SettingsService initialized --- !!!')
         self.settings_file_path = Path(settings_file)
         self.settings = self._load()
 

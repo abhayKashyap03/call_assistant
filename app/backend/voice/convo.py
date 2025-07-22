@@ -1,44 +1,20 @@
 """Conversation Controller to orchestrate the AI call flow."""
 
-from twilio.twiml.voice_response import VoiceResponse, Gather, Say, Redirect
-from twilio.rest import Client
+from flask import g
+from twilio.twiml.voice_response import VoiceResponse, Gather
 from app.backend.llm_rag.llm import LLMClient
-from app.backend.configs.settings import SettingsService
+from app.backend.llm_rag.rag_pipeline import RAGPipeline
 from dotenv import load_dotenv
-import os
 
 
 load_dotenv()
-
-def update_webhook_url(url):
-    """Update the Twilio webhook URL for voice calls."""
-    try:
-        # Load environment variables
-        current_settings = SettingsService().get_settings()
-        account_sid = current_settings.twilio_account_sid
-        auth_token = current_settings.twilio_auth_token
-        phone_sid = current_settings.twilio_phone_sid
-
-        # Initialize Twilio client
-        client = Client(account_sid, auth_token)
-
-        # Update the webhook URL
-        client.incoming_phone_numbers(phone_sid).update(
-            voice_url=url
-        )
-        
-        print("Webhook URL updated successfully.")
-    except Exception as e:
-        print("exception!!!")
-        raise Exception(e) from e
-
 
 class ConversationController:
     """Controls the conversation flow for AI voice calls."""
     
     def __init__(self):
         """Initialize the conversation controller."""
-        self.llm_client = LLMClient()
+        print('!!! --- ConversationController initialized --- !!!')
         self.active_conversations = {}
     
     def handle_call(self, call_sid, speech_result=None):
@@ -52,6 +28,14 @@ class ConversationController:
         Returns:
             str: TwiML response
         """
+        if g.rag_pipeline is None:
+            g.rag_pipeline = RAGPipeline()
+        rag_pipeline = g.rag_pipeline
+        
+        if g.llm_client is None:
+            g.llm_client = LLMClient()
+        llm_client = g.llm_client
+        
         # Initialize conversation if new call
         if call_sid not in self.active_conversations:
             self.active_conversations[call_sid] = {
@@ -68,8 +52,10 @@ class ConversationController:
                 'content': speech_result
             })
             
+            context = rag_pipeline.search(speech_result, k=5)
+            
             # Generate AI response
-            ai_response = self.generate_response(speech_result, conversation)
+            ai_response = llm_client.generate_response(speech_result, context=context, conv_context=conversation['messages'])
             
             # Add AI response to conversation
             conversation['messages'].append({
@@ -92,21 +78,6 @@ class ConversationController:
             print(f"\n\nconversation: {conversation['messages']}\n\n")
 
             return self.create_twiml_response(greeting)
-    
-    def generate_response(self, user_input, conversation):
-        """
-        Generate AI response using RAG service.
-        
-        Args:
-            user_input: User's spoken input
-            conversation: Current conversation context
-            
-        Returns:
-            str: AI response
-        """
-        # Use RAG service to generate contextual response
-        response = self.llm_client.generate_response(user_input, conv_context=conversation['messages'])
-        return response
     
     def create_twiml_response(self, message):
         """

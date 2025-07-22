@@ -1,6 +1,6 @@
 from pyngrok import ngrok
+from twilio.rest import Client
 from app.backend.configs.settings import SettingsService
-from app.backend.voice.convo import update_webhook_url
 
 
 class NgrokManager:
@@ -27,9 +27,23 @@ class NgrokManager:
             self.state['ngrok'] = 'active'
             self.state['publicUrl'] = self.active_tunnel.public_url
             try:
-                update_webhook_url(f"{self.active_tunnel.public_url}/voice")
+                current_settings = SettingsService().get_settings()
+                account_sid = current_settings.twilio_account_sid
+                auth_token = current_settings.twilio_auth_token
+                phone_sid = current_settings.twilio_phone_sid
+
+                # Initialize Twilio client
+                client = Client(account_sid, auth_token)
+
+                # Update the webhook URL
+                client.incoming_phone_numbers(phone_sid).update(
+                    voice_url=self.active_tunnel.public_url + '/voice'
+                )
+                
+                print("Webhook URL updated successfully.")
                 self.state['twilio'] = 'configured'
             except Exception:
+                print("Failed to update Twilio webhook URL. Ensure Twilio tokens are configured.")
                 self.state['twilio'] = 'error'
             return self.active_tunnel.public_url
         except Exception as e:

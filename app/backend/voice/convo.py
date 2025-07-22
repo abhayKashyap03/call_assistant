@@ -2,9 +2,8 @@
 
 from flask import g
 from twilio.twiml.voice_response import VoiceResponse, Gather
-from app.backend.llm_rag.llm import LLMClient
-from app.backend.llm_rag.rag_pipeline import RAGPipeline
 from dotenv import load_dotenv
+from app.backend.configs import services
 
 
 load_dotenv()
@@ -28,13 +27,8 @@ class ConversationController:
         Returns:
             str: TwiML response
         """
-        if g.rag_pipeline is None:
-            g.rag_pipeline = RAGPipeline()
-        rag_pipeline = g.rag_pipeline
-        
-        if g.llm_client is None:
-            g.llm_client = LLMClient()
-        llm_client = g.llm_client
+        rag_pipeline = services.get_rag_pipeline()
+        llm_client = services.get_llm_client()
         
         # Initialize conversation if new call
         if call_sid not in self.active_conversations:

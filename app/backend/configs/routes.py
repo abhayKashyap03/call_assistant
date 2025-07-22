@@ -1,19 +1,12 @@
 import os
 import tempfile
 from flask import Blueprint, request, jsonify, Response, g, current_app
-from app.backend.voice.convo import ConversationController
-from app.backend.voice.ngrok_control import NgrokManager
-from app.backend.configs.settings import Settings, SettingsService
-from app.backend.llm_rag.rag_pipeline import RAGPipeline
-import app
+from app.backend.configs.settings import Settings
+from app.backend.configs import services
+
 
 bp = Blueprint('main', __name__)
-ngrok_manager = NgrokManager()
-
-if g.settings_service is None:
-    g.settings_service = SettingsService()
-settings_service = g.settings_service
-
+ngrok_manager = services.get_ngrok_manager()
 
 @bp.route('/health', methods=['GET'])
 def health_check():
@@ -24,9 +17,7 @@ def health_check():
 @bp.route('/voice', methods=['POST'])
 def twilio_webhook():
     """Handle Twilio webhook for voice calls."""
-    if g.conversation_controller is None:
-        g.conversation_controller = ConversationController()
-    conversation_controller = g.conversation_controller
+    conversation_controller = services.get_conversation_controller()
     
     try:
         # Get Twilio request data
@@ -71,6 +62,7 @@ def get_ngrok_status():
 @bp.route('/env', methods=['GET', 'POST'])
 def update_env():
     """Update environment variables."""
+    settings_service = services.get_settings_service()
     if request.method == 'POST':
         settings_service.save(Settings(**request.json))
         return jsonify({'status': 'success', 'message': 'Environment variables updated'}), 200

@@ -1,8 +1,9 @@
 import google.generativeai as genai
-from app.backend.configs.settings import SettingsService
 from typing import List, Optional, Tuple, Any
 from flask import g
 import logging
+from app.backend.configs import services
+
 
 logger = logging.getLogger(__name__)
 
@@ -13,10 +14,7 @@ class LLMClient:
     def __init__(self, model_name: str = 'gemini-2.0-flash-lite', api_key: Optional[str] = None):
         print('!!! --- LLMClient initialized --- !!!')
         if api_key is None:
-            try:
-                api_key = g.settings_service.get_settings().google_api_key
-            except Exception:
-                api_key = SettingsService().get_settings().google_api_key
+            api_key = services.get_settings_service().get_settings().google_api_key
         genai.configure(api_key=api_key)
         self.model = genai.GenerativeModel(model_name)
         logger.info(f"Initialized Gemini LLMClient with model: {model_name}")
@@ -41,12 +39,14 @@ class LLMClient:
             )
         context_str = "\n---\n".join(context_parts)
         prompt = f"""
-            Based on the following context, and previous conversation messages, if any, please answer the user's question. Be accurate and cite the relevant sources.
+            You are a customer support and sales representative who is an expert at resolving customer issues and serving customers. 
+            Given the information context, and previous conversation messages, if any, please answer the user's question. 
+            Be accurate and cite the relevant sources.
 
-            Previous conversation:
+            Previous conversation messages:
             {conv_context}
             
-            Context:
+            Information context:
             {context_str}
 
             Question: {query}

@@ -1,13 +1,12 @@
 from pyngrok import ngrok
 from twilio.rest import Client
-from app.backend.configs.settings import SettingsService
+from app.backend.configs import services
 
 
 class NgrokManager:
     """Manager for ngrok tunnels."""
     def __init__(self):
         self.active_tunnel = None
-        self.settings_service = SettingsService()
         self.state = {
             "ngrok": "inactive",
             "twilio": "unconfigured",
@@ -27,7 +26,7 @@ class NgrokManager:
             self.state['ngrok'] = 'active'
             self.state['publicUrl'] = self.active_tunnel.public_url
             try:
-                current_settings = SettingsService().get_settings()
+                current_settings = services.get_settings_service().get_settings()
                 account_sid = current_settings.twilio_account_sid
                 auth_token = current_settings.twilio_auth_token
                 phone_sid = current_settings.twilio_phone_sid

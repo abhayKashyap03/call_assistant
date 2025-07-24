@@ -33,7 +33,7 @@ export default function MainPage() {
     const [isLoading, setIsLoading] = useState(true);
     const [stage, setStage] = useState('')
 
-    const API_BASE_URL = 'http://localhost:5000';
+    const API_BASE_URL = '/api'
 
     const fetchStatus = async () => {
         setIsLoading(true);

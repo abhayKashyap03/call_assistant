@@ -1,0 +1,29 @@
+# render.yaml - Blueprint for deploying the AI Call Assistant
+
+services:
+  # --- The Backend Service ---
+  - type: web
+    name: ai-call-assistant-backend
+    # Use 'docker' as the runtime because we have a Dockerfile
+    runtime: docker
+    # Path to the directory containing the Dockerfile and source
+    repo: https://github.com/abhayKashyap03/call_assistant.git # Replace with your repo URL
+    # Path to the Dockerfile relative to the repo root
+    dockerfilePath: ./app/backend/Dockerfile
+    # Environment variables are managed in the Render dashboard for security
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.10.13
+      # Add other non-secret env vars here if needed
+
+  # --- The Frontend Service ---
+  - type: web
+    name: ai-call-assistant-frontend
+    runtime: docker
+    repo: https://github.com/abhayKashyap03/call_assistant.git # Replace with your repo URL
+    dockerfilePath: ./app/frontend/Dockerfile
+    # --- This is the magic for connecting frontend and backend ---
+    # We will create a URL rewrite rule
+    rules:
+      - source: "/api/*"
+        destination: "https://ai-call-assistant-backend.onrender.com/api/*" # The '*' is a wildcard

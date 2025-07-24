@@ -24,4 +24,4 @@ app/frontend/dist
 
 # IDE and OS files
 .vscode
-*.DS_Store
+*.DS

@@ -2,7 +2,7 @@ import { useRef, useState } from 'react';
 import axios from 'axios';
 import { ActionButton } from './MainPage';
 
-const API_BASE_URL = 'http://localhost:5000';
+const API_BASE_URL = '/api';
 
 export default function DocIn() {
   const [files, setFiles] = useState<File[]>([]);

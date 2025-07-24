@@ -54,7 +54,6 @@ export default function MainPage() {
             await axios.post(`${API_BASE_URL}/ngrok/start`);
             setStage('starting');
             setTimeout(fetchStatus, 2000);
-            setAgentState({ ...agentState, ngrok: 'active', twilio: 'configured' });
         } catch (error) {
             console.error("Error starting ngrok:", error);
             setAgentState({ ...agentState, ngrok: 'error', twilio: 'unconfigured' });
@@ -68,7 +67,6 @@ export default function MainPage() {
             await axios.post(`${API_BASE_URL}/ngrok/stop`);
             setStage('stopping')
             setTimeout(fetchStatus, 2000);
-            setAgentState({ ...agentState, ngrok: 'inactive', twilio: 'unconfigured' });
         } catch (error) {
             console.error("Error stopping ngrok:", error);
             setAgentState({ ...agentState, ngrok: 'error', twilio: 'configured' });

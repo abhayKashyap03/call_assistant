@@ -13,8 +13,7 @@ class Settings(BaseModel):
 
 
 class SettingsService:
-    def __init__(self, settings_file: str = "app/settings.json"):
-        print('!!! --- SettingsService initialized --- !!!')
+    def __init__(self, settings_file: str = "./settings.json"):
         self.settings_file_path = Path(settings_file)
         self.settings = self._load()
 
@@ -25,11 +24,11 @@ class SettingsService:
                 return Settings(**data)
         return Settings() # Return an empty settings object if file doesn't exist
 
-    def save(self, settings_data: Settings):
+    def save(self, settings_data):
         # Merge new data with existing data
         # This allows users to update only one key at a time if they want
         updated_data = self.settings.model_dump(exclude_unset=True)
-        updated_data.update(settings_data.model_dump(exclude_unset=True))
+        updated_data.update(**settings_data)
         
         self.settings = Settings(**updated_data)
 

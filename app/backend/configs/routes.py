@@ -1,12 +1,10 @@
 import os
 import tempfile
-from flask import Blueprint, request, jsonify, Response, g, current_app
-from app.backend.configs.settings import Settings
+from flask import Blueprint, request, jsonify, Response, g
 from app.backend.configs import services
 
 
 bp = Blueprint('main', __name__)
-ngrok_manager = services.get_ngrok_manager()
 
 @bp.route('/health', methods=['GET'])
 def health_check():
@@ -39,6 +37,7 @@ def twilio_webhook():
 
 @bp.route('/ngrok/start', methods=['POST'])
 def start_ngrok():
+    ngrok_manager = services.get_ngrok_manager()
     try:
         public_url = ngrok_manager.start_ngrok_tunnel()
         return jsonify({'status': 'success', 'public_url': public_url})
@@ -48,6 +47,7 @@ def start_ngrok():
 
 @bp.route('/ngrok/stop', methods=['POST'])
 def stop_ngrok():
+    ngrok_manager = services.get_ngrok_manager()
     try:
         ngrok_manager.stop_ngrok_tunnel()
         return jsonify({'status': 'success', 'message': 'Ngrok tunnel stopped'})
@@ -57,6 +57,7 @@ def stop_ngrok():
 
 @bp.route('/ngrok/status', methods=['GET'])
 def get_ngrok_status():
+    ngrok_manager = services.get_ngrok_manager()
     return jsonify(ngrok_manager.get_tunnel_status())
 
 @bp.route('/env', methods=['GET', 'POST'])
@@ -64,7 +65,7 @@ def update_env():
     """Update environment variables."""
     settings_service = services.get_settings_service()
     if request.method == 'POST':
-        settings_service.save(Settings(**request.json))
+        settings_service.save(request.json)
         return jsonify({'status': 'success', 'message': 'Environment variables updated'}), 200
     
     # Mask sensitive data
@@ -81,9 +82,7 @@ def update_env():
 def doc_in():
     """Handle document upload or URL ingestion."""
     try:
-        if g.rag_pipeline is None:
-            g.rag_pipeline = RAGPipeline()
-        rag_pipeline = g.rag_pipeline
+        rag_pipeline = services.get_rag_pipeline()
         uploaded_files = request.files.getlist('file')
         url = request.form.get('url')
 

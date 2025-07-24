@@ -12,7 +12,6 @@ class LLMClient:
     Handles all LLM (Gemini) prompt construction, API calls, and response formatting.
     """
     def __init__(self, model_name: str = 'gemini-2.0-flash-lite', api_key: Optional[str] = None):
-        print('!!! --- LLMClient initialized --- !!!')
         if api_key is None:
             api_key = services.get_settings_service().get_settings().google_api_key
         genai.configure(api_key=api_key)

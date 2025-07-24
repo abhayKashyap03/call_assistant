@@ -12,7 +12,7 @@ class NgrokManager:
             "twilio": "unconfigured",
             "publicUrl": ""
         }
-    
+
     def start_ngrok_tunnel(self):
         """Start an ngrok tunnel and return the public URL."""
         if self.active_tunnel is not None:
@@ -26,10 +26,10 @@ class NgrokManager:
             self.state['ngrok'] = 'active'
             self.state['publicUrl'] = self.active_tunnel.public_url
             try:
-                current_settings = services.get_settings_service().get_settings()
-                account_sid = current_settings.twilio_account_sid
-                auth_token = current_settings.twilio_auth_token
-                phone_sid = current_settings.twilio_phone_sid
+                settings = services.get_settings_service().get_settings()
+                account_sid = settings.twilio_account_sid
+                auth_token = settings.twilio_auth_token
+                phone_sid = settings.twilio_phone_sid
 
                 # Initialize Twilio client
                 client = Client(account_sid, auth_token)
@@ -41,8 +41,8 @@ class NgrokManager:
                 
                 print("Webhook URL updated successfully.")
                 self.state['twilio'] = 'configured'
-            except Exception:
-                print("Failed to update Twilio webhook URL. Ensure Twilio tokens are configured.")
+            except Exception as e:
+                print(f"Failed to update Twilio webhook URL: {e}")
                 self.state['twilio'] = 'error'
             return self.active_tunnel.public_url
         except Exception as e:
@@ -65,8 +65,3 @@ class NgrokManager:
     def get_tunnel_status(self):
         """Get the status of the ngrok tunnel."""        
         return self.state
-
-
-if __name__ == "__main__":
-    ngrok_manager = NgrokManager()
-    ngrok_manager.start_ngrok_tunnel()

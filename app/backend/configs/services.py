@@ -1,33 +1,49 @@
-# app/backend/services.py
-from flask import g
 from app.backend.configs.settings import SettingsService
 from app.backend.voice.ngrok_control import NgrokManager
 from app.backend.voice.convo import ConversationController
 from app.backend.llm_rag.rag_pipeline import RAGPipeline
 from app.backend.llm_rag.llm import LLMClient
 
+class ServiceProvider:
+    """
+    A Singleton class to manage and provide a single instance
+    of each heavy service for the entire application worker process.
+    """
+    def __init__(self):
+        self._instances = {}
+
+    def get(self, service_class):
+        """Gets a service, creating it if it doesn't exist."""
+        # Use the class itself as the key
+        if service_class not in self._instances:
+            print(f"--- LAZY LOADING (ONCE PER WORKER): {service_class.__name__} ---")
+            if service_class == RAGPipeline:
+                instance = RAGPipeline()
+                instance.load_index() # Load index on creation
+                self._instances[service_class] = instance
+            else:
+                self._instances[service_class] = service_class()
+        
+        return self._instances[service_class]
+
+# --- Create a SINGLE, GLOBAL instance of the provider ---
+# This is safe because the provider itself is very lightweight.
+service_provider = ServiceProvider()
+
+# --- Create simple getter functions for the rest of the app to use ---
+# These functions are now much simpler.
 
 def get_settings_service() -> SettingsService:
-    if 'settings_service' not in g:
-        g.settings_service = SettingsService()
-    return g.settings_service
+    return service_provider.get(SettingsService)
 
 def get_ngrok_manager() -> NgrokManager:
-    if 'ngrok_manager' not in g:
-        g.ngrok_manager = NgrokManager()
-    return g.ngrok_manager
+    return service_provider.get(NgrokManager)
 
 def get_rag_pipeline() -> RAGPipeline:
-    if 'rag_pipeline' not in g:
-        g.rag_pipeline = RAGPipeline()
-    return g.rag_pipeline
+    return service_provider.get(RAGPipeline)
 
 def get_llm_client() -> LLMClient:
-    if 'llm_client' not in g:
-        g.llm_client = LLMClient()
-    return g.llm_client
+    return service_provider.get(LLMClient)
 
 def get_conversation_controller() -> ConversationController:
-    if 'conversation_controller' not in g:
-        g.conversation_controller = ConversationController()
-    return g.conversation_controller
+    return service_provider.get(ConversationController)

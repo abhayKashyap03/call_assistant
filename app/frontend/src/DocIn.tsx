@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useRef, useState } from 'react';
 import axios from 'axios';
 import { ActionButton } from './MainPage';
 
@@ -9,6 +9,8 @@ export default function DocIn() {
   const [url, setUrl] = useState('');
   const [status, setStatus] = useState('');
   const [loading, setLoading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     if (e.target.files) {
@@ -34,6 +36,9 @@ export default function DocIn() {
       setStatus(res.data.message || 'Success!');
       setFiles([]);
       setUrl('');
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
     } catch (err: any) {
       setStatus(err.response?.data?.message || 'Error uploading document');
     } finally {
@@ -47,7 +52,7 @@ export default function DocIn() {
       <form onSubmit={handleSubmit} className="docin-form">
         <div className="form-group">
           <label>Upload document(s): </label>
-          <input type="file" multiple onChange={handleFileChange} placeholder="Select files" />
+          <input type="file" multiple onChange={handleFileChange} placeholder="Select files" ref={fileInputRef} />
         </div>
         <div className="form-group">
           <label>Or enter a web URL: </label>

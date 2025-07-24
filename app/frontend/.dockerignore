@@ -1,0 +1,12 @@
+# frontend/.dockerignore
+
+# Ignore Node.js dependencies, we will install them inside the container
+node_modules
+
+# Ignore build artifacts, they will be generated inside the container
+dist
+build
+
+# Ignore Vite-specific cache and env files
+.vite
+.env.local

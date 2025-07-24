@@ -86,7 +86,6 @@ class TextChunker:
     """
     
     def __init__(self, chunk_size: int = 400, overlap: int = 50):
-        print('!!! --- TextChunker initialized --- !!!')
         self.chunk_size = chunk_size
         self.overlap = overlap
         
@@ -174,7 +173,6 @@ class EmbeddingEngine:
     """
     
     def __init__(self, model_name: str = "sentence-transformers/all-MiniLM-L6-v2"):
-        print('!!! --- EmbeddingEngine initialized --- !!!')
         logger.info(f"Loading embedding model: {model_name}")
         self.model = SentenceTransformer(model_name)
         self.dimension = self.model.get_sentence_embedding_dimension()
@@ -222,7 +220,6 @@ class VectorStore:
     """
     
     def __init__(self, dimension: int):
-        print('!!! --- VectorStore initialized --- !!!')
         self.dimension = dimension
         self.index = faiss.IndexFlatL2(dimension)  # L2 distance index
         self.chunks: List[DocumentChunk] = []
@@ -430,7 +427,6 @@ class RAGPipeline:
     Unified RAG pipeline: ingestion, retrieval, and LLM-based answer generation.
     """
     def __init__(self, chunk_size: int = 400, overlap: int = 50, embedding_model: str = "sentence-transformers/all-MiniLM-L6-v2"):
-        print('!!! --- RAGPipeline initialized --- !!!')
         self.extractor_factory = ContentExtractorFactory()
         self.chunker = TextChunker(chunk_size=chunk_size, overlap=overlap)
         self.embedding_engine = EmbeddingEngine(model_name=embedding_model)

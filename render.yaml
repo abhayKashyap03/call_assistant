@@ -26,4 +26,4 @@ services:
     # We will create a URL rewrite rule
     rules:
       - source: "/api/*"
-        destination: "https://ai-call-assistant-backend.onrender.com/api/*" # The '*' is a wildcard
+        destination: "https://rag-voice-agent.onrender.com/api/*"

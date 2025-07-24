@@ -17,4 +17,8 @@ services:
   frontend:
     build:
       context: ./app/frontend
-      docke
+      dockerfile: Dockerfile
+    ports:
+      - "3000:80"
+    depends_on:
+      - web

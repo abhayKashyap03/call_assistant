@@ -65,7 +65,7 @@ def update_env():
     """Update environment variables."""
     settings_service = services.get_settings_service()
     if request.method == 'POST':
-        settings_service.save(request.json)
+        settings_service.save(request.get_json())
         return jsonify({'status': 'success', 'message': 'Environment variables updated'}), 200
     
     # Mask sensitive data

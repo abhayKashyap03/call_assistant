@@ -28,7 +28,7 @@ class SettingsService:
         # Merge new data with existing data
         # This allows users to update only one key at a time if they want
         updated_data = self.settings.model_dump(exclude_unset=True)
-        updated_data.update(**settings_data)
+        updated_data.update(settings_data)
         
         self.settings = Settings(**updated_data)
 

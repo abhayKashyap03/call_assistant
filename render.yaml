@@ -3,13 +3,13 @@
 services:
   # --- The Backend Service ---
   - type: web
-    name: ai-call-assistant-backend
+    name: rag-va
     # Use 'docker' as the runtime because we have a Dockerfile
     runtime: docker
     # Path to the directory containing the Dockerfile and source
     repo: https://github.com/abhayKashyap03/call_assistant.git # Replace with your repo URL
     # Path to the Dockerfile relative to the repo root
-    dockerfilePath: ./app/backend/Dockerfile
+    dockerfilePath: ./Dockerfile
     # Environment variables are managed in the Render dashboard for security
     envVars:
       - key: PYTHON_VERSION
@@ -18,7 +18,7 @@ services:
 
   # --- The Frontend Service ---
   - type: web
-    name: ai-call-assistant-frontend
+    name: rag-va-frontend
     runtime: docker
     repo: https://github.com/abhayKashyap03/call_assistant.git # Replace with your repo URL
     dockerfilePath: ./app/frontend/Dockerfile

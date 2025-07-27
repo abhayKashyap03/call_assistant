@@ -1,8 +1,8 @@
 {
   "rewrites": [
     {
-      "source": "/api/(.*)",
-      "destination": "https://call-assistant-b2h5.onrender.com/api/$1"
+      "source": "/(.*)",
+      "destination": "https://call-assistant-b2h5.onrender.com/$1"
     }
   ]
 }

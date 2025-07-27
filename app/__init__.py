@@ -13,7 +13,7 @@ def create_app():
     CORS(app)
     
     # Register blueprints
-    app.register_blueprint(routes_bp, url_prefix='/api')
+    app.register_blueprint(routes_bp, url_prefix='/')
 
     
     return app

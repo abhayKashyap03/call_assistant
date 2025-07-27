@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { ActionButton } from './MainPage';
 
-const API_BASE_URL = '/api';
+const API_BASE_URL = '/';
 
 interface SettingsData {
     twilio_account_sid?: string;

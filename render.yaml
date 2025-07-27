@@ -25,5 +25,5 @@ services:
     # --- This is the magic for connecting frontend and backend ---
     # We will create a URL rewrite rule
     rules:
-      - source: "/*"
+      - source: "/api/*"
         destination: "https://call-assistant-b2h5.onrender.com/*"

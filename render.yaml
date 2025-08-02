@@ -26,4 +26,4 @@ services:
     # We will create a URL rewrite rule
     rules:
       - source: "/api/*"
-        destination: "https://call-assistant-b2h5.onrender.com/*"
+        destination: "https://rag-va.onrender.com/*"

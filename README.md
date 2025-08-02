@@ -72,6 +72,13 @@ python cli.py ngrok
 python cli.py --help
 ```
 
+# Web App Demo
+
+![Main Page Ngrok Inactive](imgs/main_inactive.jpeg)
+![Settings Page](imgs/settings_page.jpeg)
+![Document/Website Upload Page](imgs/doc_upload_page.jpeg)
+![Main Page Ngrok Active](imgs/main_active.jpeg)
+
 ## Environment Variables
 
 Create a `.env` file with the necessary API keys:

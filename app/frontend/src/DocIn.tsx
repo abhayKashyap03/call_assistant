@@ -2,7 +2,7 @@ import { useRef, useState } from 'react';
 import axios from 'axios';
 import { ActionButton } from './MainPage';
 
-const API_BASE_URL = '/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export default function DocIn() {
   const [files, setFiles] = useState<File[]>([]);

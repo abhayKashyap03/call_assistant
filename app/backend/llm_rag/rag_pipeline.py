@@ -23,12 +23,14 @@ from typing import List, Dict, Tuple, Union, Optional, Any, TYPE_CHECKING
 from dataclasses import dataclass
 import numpy as np
 
-from sentence_transformers import SentenceTransformer
+from google import genai
+from google.genai import types
 import faiss
 
 from app.backend.llm_rag.extraction.base_extractor import Document
 from app.backend.llm_rag.extraction.file_extractor import FileExtractor
 from app.backend.llm_rag.extraction.web_extractor import WebExtractor
+from app.backend.configs import services
 
 
 # Setup logger
@@ -172,11 +174,12 @@ class EmbeddingEngine:
     Similarity between texts A and B: sim(A,B) = cos(E_A, E_B) = (E_A · E_B) / (||E_A|| ||E_B||)
     """
     
-    def __init__(self, model_name: str = "sentence-transformers/all-MiniLM-L6-v2"):
-        logger.info(f"Loading embedding model: {model_name}")
-        self.model = SentenceTransformer(model_name)
-        self.dimension = self.model.get_sentence_embedding_dimension()
-        logger.info(f"Embedding dimension: {self.dimension}")
+    def __init__(self, api_key=None, model_name: str = "gemini-embedding-001", dimension=384):
+        if api_key is None:
+            api_key = services.get_settings_service().get_settings().google_api_key
+        self.gemini_client = genai.Client(api_key=api_key)
+        self.model_name = model_name
+        self.dimension = dimension
     
     def embed_texts(self, texts: List[str]) -> np.ndarray:
         """
@@ -187,17 +190,21 @@ class EmbeddingEngine:
             
         Returns:
             NumPy array of embeddings (shape: [n_texts, embedding_dim])
-        """
-        if not texts:
+        """        
+        try:
+            logger.info(f"Generating embeddings for {len(texts)} texts")
+            logger.info(f"Loading embedding model: {self.model_name}")
+            embeddings = self.gemini_client.models.embed_content(model=self.model_name, contents=texts, 
+                            config=types.EmbedContentConfig(output_dimensionality=self.dimension)).embeddings
+            logger.info(f"Embedding dimension: {len(embeddings[0].values)}")
+            return np.array([e.values for e in embeddings])
+        except Exception as e:
+            logger.error(f"Error generating embeddings: {e}")
             return np.empty((0, self.dimension))
-        
-        logger.info(f"Generating embeddings for {len(texts)} texts")
-        embeddings = self.model.encode(texts, show_progress_bar=True)
-        return embeddings
     
     def embed_single(self, text: str) -> np.ndarray:
         """Generate embedding for a single text."""
-        return self.model.encode([text])[0]
+        return self.embed_texts([text])[0]
 
 
 class VectorStore:
@@ -426,7 +433,7 @@ class RAGPipeline:
     """
     Unified RAG pipeline: ingestion, retrieval, and LLM-based answer generation.
     """
-    def __init__(self, chunk_size: int = 400, overlap: int = 50, embedding_model: str = "sentence-transformers/all-MiniLM-L6-v2"):
+    def __init__(self, chunk_size: int = 400, overlap: int = 50, embedding_model: str = "gemini-embedding-001"):
         self.extractor_factory = ContentExtractorFactory()
         self.chunker = TextChunker(chunk_size=chunk_size, overlap=overlap)
         self.embedding_engine = EmbeddingEngine(model_name=embedding_model)

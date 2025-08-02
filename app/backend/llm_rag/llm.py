@@ -1,4 +1,4 @@
-import google.generativeai as genai
+from google import genai
 from typing import List, Optional, Tuple, Any
 from flask import g
 import logging
@@ -14,8 +14,8 @@ class LLMClient:
     def __init__(self, model_name: str = 'gemini-2.0-flash-lite', api_key: Optional[str] = None):
         if api_key is None:
             api_key = services.get_settings_service().get_settings().google_api_key
-        genai.configure(api_key=api_key)
-        self.model = genai.GenerativeModel(model_name)
+        self.gemini_client = genai.Client(api_key=api_key)
+        self.model_name = model_name
         logger.info(f"Initialized Gemini LLMClient with model: {model_name}")
 
     def generate_response(self, query: str, context: Optional[List] = None, conv_context: Any = None) -> str:
@@ -52,7 +52,7 @@ class LLMClient:
 
             Answer:"""
         try:
-            response = self.model.generate_content(prompt)
+            response = self.gemini_client.models.generate_content(model=self.model_name, contents=prompt)
             return response.text
         except Exception as e:
             logger.error(f"Error generating response with Gemini: {e}")
@@ -83,7 +83,7 @@ class LLMClient:
 
             Answer:"""
         try:
-            response = self.model.generate_content(prompt)
+            response = self.gemini_client.models.generate_content(model=self.model_name, contents=prompt)
             avg_relevance = sum(getattr(result, 'relevance_score', 0) for result in context) / len(context)
             confidence = min(0.95, avg_relevance * 0.8 + 0.2)
             return (response.text, confidence, sources)

@@ -40,4 +40,4 @@ RUN chown -R ${APP_USER}:${APP_GROUP} ${APP_HOME}
 # --- 5. RUN THE APPLICATION ---
 EXPOSE 5000
 USER ${APP_USER}
-CMD ["gunicorn", "--bind", "0.0.0.0:${PORT:-5000}", "run:app"]
+CMD gunicorn --bind 0.0.0.0:${PORT:-5000} run:app

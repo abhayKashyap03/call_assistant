@@ -22,6 +22,7 @@ run.py         # Flask app launcher
 
 ## Setup
 
+### Build from source
 1. Install dependencies and set up the project:
 ```bash
 pip install -e .
@@ -43,6 +44,11 @@ flask --app app run --debug
 3. Start React app from inside the frontend folder
 ```bash
 npm run dev
+```
+
+### Docker container
+```bash
+docker compose up --build
 ```
 
 ## Endpoints

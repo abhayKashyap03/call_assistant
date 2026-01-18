@@ -4,14 +4,14 @@ This module implements a comprehensive RAG system with:
 1. Document chunking with token-based overlap
 2. Sentence-transformers embeddings (all-MiniLM-L6-v2)
 3. FAISS vector storage with flat L2 distance
-4. Search-R1 algorithm for enhanced retrieval
-5. Multi-stage retrieval and reranking
+4. Agentic Rag mechanism for enhanced retrieval and reasoning for accurate context 
+5. Multi-stage reranking
 
 Math & Theory:
 - Vector embeddings map text to high-dimensional space where semantic similarity
   correlates with geometric distance (cosine similarity or L2 distance)
 - FAISS uses optimized nearest neighbor search algorithms
-- Search-R1 implements retrieval-focused reasoning with multi-hop search
+- Retrieval-focused reasoning with multi-hop search
 """
 
 
@@ -70,7 +70,7 @@ class SearchResult:
     chunk: DocumentChunk
     similarity_score: float
     relevance_score: float  # After reranking
-    reasoning_path: List[str]  # For Search-R1
+    reasoning_path: List[str]
 
 
 class TextChunker:
@@ -319,12 +319,12 @@ class VectorStore:
         logger.info(f"Vector store loaded from {filepath}. Contains {len(self.chunks)} chunks")
 
 
-class SearchR1Engine:
+class SearchEngine:
     """
-    Search-R1: Retrieval-focused reasoning for enhanced search.
+    Agentic RAG: Retrieval-focused reasoning for enhanced search.
     
     Theory:
-    Search-R1 extends traditional RAG with multi-step reasoning:
+    Agentic RAG mechanisms extend traditional RAG with multi-step reasoning:
     1. Initial retrieval based on query
     2. Reasoning about retrieved content
     3. Iterative refinement of search queries
@@ -437,7 +437,7 @@ class RAGPipeline:
         self.extractor_factory = ContentExtractorFactory()
         self.chunker = TextChunker(chunk_size=chunk_size, overlap=overlap)
         self.embedding_engine = EmbeddingEngine(model_name=embedding_model)
-        self.search_engine = SearchR1Engine()
+        self.search_engine = SearchEngine()
         self.vector_store = None
         try:
             self.load_index()
